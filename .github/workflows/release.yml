@@ -169,13 +169,15 @@ jobs:
           path: dist
           retention-days: 30
 
-      - if: needs.plan.outputs.publish == 'true'
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      - name: Attest build provenance (SLSA)
+        if: needs.plan.outputs.publish == 'true'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: dist/PaperRoute-*.zip
 
-      - if: needs.plan.outputs.publish == 'true'
-        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+      - name: Attest SBOM
+        if: needs.plan.outputs.publish == 'true'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: dist/PaperRoute-*.zip
           sbom-path: dist/paperroute.cdx.json
