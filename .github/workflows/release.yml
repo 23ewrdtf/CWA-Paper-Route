@@ -97,12 +97,17 @@ jobs:
       - name: Microsoft Defender scan (catch antivirus false positives before users do)
         shell: pwsh
         run: |
+          # MpCmdRun returns 2 both for "threat found" and for "could not scan" (GitHub's Windows runners
+          # keep the Defender service off), so judge by what it prints, not by the exit code.
           $scanner = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
-          if (-not (Test-Path $scanner)) { Write-Output '::warning::Microsoft Defender is not available on this runner - scan skipped'; exit 0 }
+          if (-not (Test-Path $scanner)) { Write-Output '::warning::Microsoft Defender is not installed on this runner - not scanned'; exit 0 }
           & $scanner -SignatureUpdate | Out-Null
-          & $scanner -Scan -ScanType 3 -File (Resolve-Path publish) -DisableRemediation
-          if ($LASTEXITCODE -eq 2) { Write-Error 'Microsoft Defender flagged the build'; exit 1 }
-          if ($LASTEXITCODE -ne 0) { Write-Output "::warning::Defender scan returned $LASTEXITCODE (not a detection)" }
+          $output = & $scanner -Scan -ScanType 3 -File (Resolve-Path publish) -DisableRemediation 2>&1 | Out-String
+          Write-Output $output
+          if ($output -match 'found no threats') { Write-Output 'Defender: no threats found'; exit 0 }
+          if ($output -match '(?im)^\s*Threat\s|found \d+ threats?') { Write-Error 'Microsoft Defender flagged the build'; exit 1 }
+          Write-Output '::warning::Microsoft Defender could not scan on this runner (service not running) - not scanned'
+          exit 0
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
