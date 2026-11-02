@@ -1,0 +1,6 @@
+# Test projects: descriptive Snake_case test names are idiomatic for xUnit.
+[*.cs]
+dotnet_diagnostic.CA1707.severity = none
+# xUnit guidance (xUnit1030): do not use ConfigureAwait(false) in tests.
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.MA0004.severity = none

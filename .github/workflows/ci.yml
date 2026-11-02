@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read # checkout only
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build, test, coverage
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore (locked)
+        run: dotnet restore PaperRoute.slnx --locked-mode
+
+      - name: Check formatting
+        run: dotnet format PaperRoute.slnx --verify-no-changes --no-restore
+
+      - name: Build (analyzers, warnings as errors)
+        run: dotnet build PaperRoute.slnx -c Release --no-restore
+
+      - name: Test with coverage
+        run: >-
+          dotnet test --solution PaperRoute.slnx -c Release --no-build
+          --coverage --coverage-output-format cobertura
+          --coverage-settings "$env:GITHUB_WORKSPACE\coverage.config"
+          --results-directory "$env:GITHUB_WORKSPACE\TestResults"
+
+      - name: CWA compatibility test (CWA's exact smtplib code against the real host)
+        run: python tests/compat/run_compat.py dotnet tests/PaperRoute.CompatHost/bin/Release/net10.0/PaperRoute.CompatHost.dll
+
+      - name: Coverage gate (PaperRoute.Core >= 85%)
+        run: python build/coverage_gate.py --reports "TestResults/*.cobertura.xml" --min 85
+
+      - name: No vulnerable packages
+        shell: pwsh
+        run: |
+          $out = dotnet list PaperRoute.slnx package --vulnerable --include-transitive 2>&1 | Out-String
+          Write-Output $out
+          if ($out -match '(?m)^\s*>\s') { Write-Error 'Vulnerable packages found'; exit 1 }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results
+          path: TestResults
+          retention-days: 14

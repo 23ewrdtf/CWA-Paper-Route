@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PaperRoute.Core/PaperRoute.Core.csproj" />
+    <Project Path="src/PaperRoute.Devices/PaperRoute.Devices.csproj" />
+    <Project Path="src/PaperRoute/PaperRoute.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PaperRoute.App.Tests/PaperRoute.App.Tests.csproj" />
+    <Project Path="tests/PaperRoute.CompatHost/PaperRoute.CompatHost.csproj" />
+    <Project Path="tests/PaperRoute.Core.Tests/PaperRoute.Core.Tests.csproj" />
+    <Project Path="tests/PaperRoute.Devices.Tests/PaperRoute.Devices.Tests.csproj" />
+    <Project Path="tests/PaperRoute.FakeConverter/PaperRoute.FakeConverter.csproj" />
+  </Folder>
+</Solution>

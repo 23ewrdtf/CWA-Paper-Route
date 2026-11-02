@@ -1,0 +1,6 @@
+# WinForms tray app (English-only UI).
+[*.cs]
+# UI text is English-only; no resource files.
+dotnet_diagnostic.CA1303.severity = none
+# Controls added to a Form's / ContextMenuStrip's collection are disposed by their container.
+dotnet_diagnostic.CA2213.severity = none

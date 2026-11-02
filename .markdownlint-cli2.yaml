@@ -1,0 +1,7 @@
+# .superpowers/ holds local working notes (git-ignored).
+ignores:
+  - ".superpowers/**"
+  - "**/bin/**"
+  - "**/obj/**"
+config:
+  MD013: false # long lines are fine; GitHub wraps them

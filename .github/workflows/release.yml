@@ -1,0 +1,182 @@
+name: Release
+
+# Every merge/push to main: test, build (x64 + ARM64), Defender scan, SBOM, and - when the <Version> in
+# Directory.Build.props has no GitHub release yet - attest and publish release v<Version>.
+# Other branches and pull requests only run CI and the security scans (see ci.yml, security.yml).
+# Manual runs (Actions -> Release -> Run workflow) build everything but never publish.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read # checkout only; the publish job asks for more
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Decide version and whether to publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      publish: ${{ steps.plan.outputs.publish }}
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read version, check for an existing release
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's|.*<Version>\([0-9][0-9A-Za-z.+-]*\)</Version>.*|\1|p' Directory.Build.props | head -n 1)
+          if [ -z "$version" ]; then echo "::error::No <Version> in Directory.Build.props"; exit 1; fi
+          publish=false
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            if gh release view "v$version" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+              echo "::notice::Release v$version already exists - building only. Bump <Version> in Directory.Build.props to publish a new release."
+            else
+              publish=true
+            fi
+          else
+            echo "::notice::Manual run - building only, nothing is published."
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "Version $version, publish=$publish" >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build ${{ matrix.rid }}
+    needs: plan
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        rid: [win-x64, win-arm64]
+    env:
+      CI: "true"
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+      RID: ${{ matrix.rid }}
+      VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Test
+        if: matrix.rid == 'win-x64'
+        run: |
+          dotnet restore PaperRoute.slnx --locked-mode
+          dotnet test --solution PaperRoute.slnx -c Release
+
+      - name: Publish single-file exe
+        shell: pwsh
+        run: |
+          # The lock files describe the normal (RID-less) build, which the test step restores in locked
+          # mode; a single-file self-contained publish adds runtime packs and ILLink, so it cannot use them.
+          dotnet publish src/PaperRoute/PaperRoute.csproj -c Release -r $env:RID --self-contained `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:RestoreLockedMode=false -p:Version=$env:VERSION -o publish
+          Copy-Item LICENSE, README.md publish/
+          Compress-Archive -Path publish/* -DestinationPath "PaperRoute-$env:VERSION-$env:RID.zip"
+
+      - name: Microsoft Defender scan (catch antivirus false positives before users do)
+        shell: pwsh
+        run: |
+          $scanner = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
+          if (-not (Test-Path $scanner)) { Write-Output '::warning::Microsoft Defender is not available on this runner - scan skipped'; exit 0 }
+          & $scanner -SignatureUpdate | Out-Null
+          & $scanner -Scan -ScanType 3 -File (Resolve-Path publish) -DisableRemediation
+          if ($LASTEXITCODE -eq 2) { Write-Error 'Microsoft Defender flagged the build'; exit 1 }
+          if ($LASTEXITCODE -ne 0) { Write-Output "::warning::Defender scan returned $LASTEXITCODE (not a detection)" }
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: zip-${{ matrix.rid }}
+          path: PaperRoute-*.zip
+          retention-days: 7
+
+  publish:
+    name: Publish release
+    needs: [plan, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # create the GitHub release and its tag
+      id-token: write # sign attestations (Sigstore)
+      attestations: write # store attestations
+    env:
+      VERSION: ${{ needs.plan.outputs.version }}
+      PUBLISH: ${{ needs.plan.outputs.publish }}
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: zip-*
+          merge-multiple: true
+          path: dist
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum PaperRoute-*.zip > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: SBOM (CycloneDX)
+        env:
+          # The app targets Windows; this lets the Linux runner restore it for the SBOM.
+          EnableWindowsTargeting: "true"
+        run: |
+          dotnet tool restore
+          dotnet CycloneDX src/PaperRoute/PaperRoute.csproj -t -F Json -o dist -fn paperroute.cdx.json \
+            -ef "SonarAnalyzer.CSharp,Roslynator.Analyzers,Meziantou.Analyzer"
+
+      - name: Keep the release files with this run
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-files
+          path: dist
+          retention-days: 30
+
+      - if: needs.plan.outputs.publish == 'true'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/PaperRoute-*.zip
+
+      - if: needs.plan.outputs.publish == 'true'
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: dist/PaperRoute-*.zip
+          sbom-path: dist/paperroute.cdx.json
+
+      - name: Create GitHub release
+        if: needs.plan.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Paper Route $VERSION" --generate-notes \
+            dist/PaperRoute-*.zip dist/SHA256SUMS.txt dist/paperroute.cdx.json
