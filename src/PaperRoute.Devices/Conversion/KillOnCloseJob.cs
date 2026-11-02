@@ -22,29 +22,34 @@ internal sealed partial class KillOnCloseJob : IDisposable
     /// <summary>Creates the job; <see langword="null"/> if Windows refuses (the caller then runs without it).</summary>
     public static KillOnCloseJob? TryCreate()
     {
+#pragma warning disable CA2000 // Ownership passes to the returned KillOnCloseJob; released in finally otherwise.
         var handle = CreateJobObjectW(IntPtr.Zero, null);
-        if (handle.IsInvalid)
-        {
-            handle.Dispose();
-            return null;
-        }
-
+#pragma warning restore CA2000
+        var handedOver = false;
         try
         {
-            var info = new ExtendedLimitInformation { Basic = new BasicLimitInformation { LimitFlags = KillOnJobClose } };
-            if (SetInformationJobObject(handle, JobObjectExtendedLimitInformation, ref info, (uint)Marshal.SizeOf<ExtendedLimitInformation>()))
+            if (handle.IsInvalid)
             {
-                return new KillOnCloseJob(handle);
+                return null;
+            }
+
+            var info = new ExtendedLimitInformation { Basic = new BasicLimitInformation { LimitFlags = KillOnJobClose } };
+            if (!SetInformationJobObject(handle, JobObjectExtendedLimitInformation, ref info, (uint)Marshal.SizeOf<ExtendedLimitInformation>()))
+            {
+                return null;
+            }
+
+            handedOver = true;
+            return new KillOnCloseJob(handle);
+        }
+        finally
+        {
+            // Released on every path except the one that hands the handle to the job object.
+            if (!handedOver)
+            {
+                handle.Dispose();
             }
         }
-        catch
-        {
-            handle.Dispose();
-            throw;
-        }
-
-        handle.Dispose();
-        return null;
     }
 
     /// <summary>Puts a process into the job; helpers it starts afterwards join automatically.</summary>
