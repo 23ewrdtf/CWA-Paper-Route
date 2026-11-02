@@ -7,7 +7,7 @@ using PaperRoute.Config;
 using PaperRoute.Smtp;
 
 // Test-only host for tests/compat/run_compat.py: real SmtpHost, "reader" = a temp folder.
-var outDir = Path.Combine(Path.GetTempPath(), "paperroute-compat-" + Guid.NewGuid().ToString("N"));
+var outDir = Path.Join(Path.GetTempPath(), "paperroute-compat-" + Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(outDir);
 int port;
 using (var probe = new TcpListener(IPAddress.Loopback, 0))

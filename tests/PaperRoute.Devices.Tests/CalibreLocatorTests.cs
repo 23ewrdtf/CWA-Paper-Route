@@ -4,7 +4,7 @@ namespace PaperRoute.Devices.Tests;
 
 public sealed class CalibreLocatorTests : IDisposable
 {
-    private readonly string _dir = Path.Combine(Path.GetTempPath(), "paperroute-loc-" + Guid.NewGuid().ToString("N"));
+    private readonly string _dir = Path.Join(Path.GetTempPath(), "paperroute-loc-" + Guid.NewGuid().ToString("N"));
 
     public CalibreLocatorTests() => Directory.CreateDirectory(_dir);
 
@@ -16,7 +16,7 @@ public sealed class CalibreLocatorTests : IDisposable
         var configured = Touch("custom", "ebook-convert.exe");
         Touch("pf", "Calibre2", "ebook-convert.exe");
 
-        Assert.Equal(configured, CalibreLocator.Find(configured, Path.Combine(_dir, "pf"), pathVariable: string.Empty));
+        Assert.Equal(configured, CalibreLocator.Find(configured, Path.Join(_dir, "pf"), pathVariable: string.Empty));
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public sealed class CalibreLocatorTests : IDisposable
     {
         var standard = Touch("pf", "Calibre2", "ebook-convert.exe");
 
-        Assert.Equal(standard, CalibreLocator.Find(null, Path.Combine(_dir, "pf"), pathVariable: string.Empty));
+        Assert.Equal(standard, CalibreLocator.Find(null, Path.Join(_dir, "pf"), pathVariable: string.Empty));
     }
 
     [Fact]
@@ -32,20 +32,20 @@ public sealed class CalibreLocatorTests : IDisposable
     {
         var onPath = Touch("bin", "ebook-convert.exe");
 
-        Assert.Equal(onPath, CalibreLocator.Find(null, Path.Combine(_dir, "none"), pathVariable: Path.Combine(_dir, "missing") + ";" + Path.Combine(_dir, "bin")));
+        Assert.Equal(onPath, CalibreLocator.Find(null, Path.Join(_dir, "none"), pathVariable: Path.Join(_dir, "missing") + ";" + Path.Join(_dir, "bin")));
     }
 
     [Fact]
     public void Missing_configured_path_falls_back() =>
-        Assert.Equal(Touch("pf", "Calibre2", "ebook-convert.exe"), CalibreLocator.Find(Path.Combine(_dir, "gone.exe"), Path.Combine(_dir, "pf"), pathVariable: string.Empty));
+        Assert.Equal(Touch("pf", "Calibre2", "ebook-convert.exe"), CalibreLocator.Find(Path.Join(_dir, "gone.exe"), Path.Join(_dir, "pf"), pathVariable: string.Empty));
 
     [Fact]
     public void Nothing_found_is_null() =>
-        Assert.Null(CalibreLocator.Find(null, Path.Combine(_dir, "none"), pathVariable: string.Empty));
+        Assert.Null(CalibreLocator.Find(null, Path.Join(_dir, "none"), pathVariable: string.Empty));
 
     private string Touch(params string[] parts)
     {
-        var path = Path.Combine([_dir, .. parts]);
+        var path = Path.Join([_dir, .. parts]);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, "x");
         return path;

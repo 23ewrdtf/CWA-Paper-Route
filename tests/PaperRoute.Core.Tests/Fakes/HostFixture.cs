@@ -78,7 +78,8 @@ internal sealed class HostFixture : IAsyncDisposable
         var builder = new BodyBuilder { TextBody = "This e-mail has been sent via Calibre-Web." };
         if (attachment is not null)
         {
-            await builder.Attachments.AddAsync(attachment, new MemoryStream(BookBytes.For(attachment, bytes)), TestContext.Current.CancellationToken);
+            using var content = new MemoryStream(BookBytes.For(attachment, bytes));
+            await builder.Attachments.AddAsync(attachment, content, TestContext.Current.CancellationToken);
         }
 
         using var message = new MimeMessage();

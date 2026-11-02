@@ -10,5 +10,5 @@ internal sealed class FolderDevice(string dir) : IReaderDevice
 
     public long FreeBytes => long.MaxValue;
 
-    public void Write(string fileName, ReadOnlyMemory<byte> content) => File.WriteAllBytes(Path.Combine(dir, fileName), content.ToArray());
+    public void Write(string fileName, ReadOnlyMemory<byte> content) => File.WriteAllBytes(Path.Join(dir, fileName), content.ToArray());
 }

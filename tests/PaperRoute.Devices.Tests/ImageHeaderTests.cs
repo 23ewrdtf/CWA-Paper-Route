@@ -47,14 +47,14 @@ public sealed class ImageHeaderTests
     [Fact]
     public void Bomb_cover_never_reaches_the_decoder_and_book_is_delivered()
     {
-        var root = Path.Combine(Path.GetTempPath(), "paperroute-bomb-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(Path.Combine(root, "system", "thumbnails"));
+        var root = Path.Join(Path.GetTempPath(), "paperroute-bomb-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Join(root, "system", "thumbnails"));
         try
         {
             new MassStorageReader(root, long.MaxValue).Write("a.azw3", global::PaperRoute.Tests.Shared.MobiBuilder.Build("B000BOMB01", "EBOK", Png(60_000, 60_000)));
 
-            Assert.True(File.Exists(Path.Combine(root, "documents", "a.azw3")));
-            Assert.Empty(Directory.GetFiles(Path.Combine(root, "system", "thumbnails")));
+            Assert.True(File.Exists(Path.Join(root, "documents", "a.azw3")));
+            Assert.Empty(Directory.GetFiles(Path.Join(root, "system", "thumbnails")));
         }
         finally
         {

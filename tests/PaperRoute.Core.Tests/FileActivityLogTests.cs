@@ -4,7 +4,7 @@ namespace PaperRoute.Core.Tests;
 
 public sealed class FileActivityLogTests : IDisposable
 {
-    private readonly string _dir = Path.Combine(Path.GetTempPath(), "paperroute-log-" + Guid.NewGuid().ToString("N"));
+    private readonly string _dir = Path.Join(Path.GetTempPath(), "paperroute-log-" + Guid.NewGuid().ToString("N"));
 
     public void Dispose()
     {
@@ -22,7 +22,7 @@ public sealed class FileActivityLogTests : IDisposable
         log.Write("hello");
         log.Write("world");
 
-        Assert.Equal(["hello", "world"], File.ReadAllLines(Path.Combine(_dir, "2026-11-01.log")));
+        Assert.Equal(["hello", "world"], File.ReadAllLines(Path.Join(_dir, "2026-11-01.log")));
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class FileActivityLogTests : IDisposable
     public void Does_not_delete_other_files_in_folder()
     {
         Directory.CreateDirectory(_dir);
-        var other = Path.Combine(_dir, "notes.txt");
+        var other = Path.Join(_dir, "notes.txt");
         File.WriteAllText(other, "keep me");
         var clock = new FixedTime(new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero));
         var log = new FileActivityLog(_dir, clock);
@@ -67,11 +67,11 @@ public sealed class FileActivityLogTests : IDisposable
         Directory.CreateDirectory(_dir);
         for (var day = 1; day <= 20; day++)
         {
-            File.WriteAllText(Path.Combine(_dir, $"2026-09-{day:00}.log"), "old");
+            File.WriteAllText(Path.Join(_dir, $"2026-09-{day:00}.log"), "old");
         }
 
         // 09-07 is the first old file pruning deletes (newest-first after the 14 kept).
-        using (new FileStream(Path.Combine(_dir, "2026-09-07.log"), FileMode.Open, FileAccess.Read, FileShare.None))
+        using (new FileStream(Path.Join(_dir, "2026-09-07.log"), FileMode.Open, FileAccess.Read, FileShare.None))
         {
             new FileActivityLog(_dir, new FixedTime(new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero))).Write("new day");
         }

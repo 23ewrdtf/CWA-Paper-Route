@@ -7,6 +7,6 @@ internal sealed record AppPaths(string ConfigFile, string LogDirectory)
 {
     /// <summary>Gets the per-user default locations.</summary>
     public static AppPaths Default { get; } = new(
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PaperRoute", "config.json"),
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PaperRoute", "logs"));
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PaperRoute", "config.json"),
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PaperRoute", "logs"));
 }

@@ -28,7 +28,7 @@ public sealed class MassStorageLocator : IDeviceLocator
         && (drive.HardwareId is not null
             ? KindleIdentity.IsKindleHardware(drive.HardwareId)
             : string.Equals(drive.Label, KindleLabel, StringComparison.OrdinalIgnoreCase)
-              || (Directory.Exists(Path.Combine(drive.Root, "documents")) && Directory.Exists(Path.Combine(drive.Root, "system"))));
+              || (Directory.Exists(Path.Join(drive.Root, "documents")) && Directory.Exists(Path.Join(drive.Root, "system"))));
 
     // Re-checked just before writing: the drive letter may now belong to another device. The hardware ID
     // includes the serial number, so even another Kindle on the same letter is refused.

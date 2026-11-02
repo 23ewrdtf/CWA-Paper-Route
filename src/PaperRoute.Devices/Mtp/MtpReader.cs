@@ -89,7 +89,6 @@ public sealed class MtpReader(string deviceId, string? friendlyName, long freeBy
             }
 
             device.Rename(target, fileName);
-            target = null; // nothing left to clean up
         }
         catch (Exception e) when (e is COMException or IOException or UnauthorizedAccessException or InvalidOperationException)
         {

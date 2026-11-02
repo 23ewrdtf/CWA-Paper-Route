@@ -23,12 +23,12 @@ public sealed class CalibreConverter(string exePath, TimeSpan timeout, string? t
     public BookAttachment ToAzw3(BookAttachment epub)
     {
         ArgumentNullException.ThrowIfNull(epub);
-        var work = Path.Combine(tempRoot ?? Path.Combine(Path.GetTempPath(), "PaperRoute"), Guid.NewGuid().ToString("N"));
+        var work = Path.Join(tempRoot ?? Path.Join(Path.GetTempPath(), "PaperRoute"), Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(work);
         try
         {
-            var input = Path.Combine(work, "book.epub");
-            var output = Path.Combine(work, "book.azw3");
+            var input = Path.Join(work, "book.epub");
+            var output = Path.Join(work, "book.azw3");
             File.WriteAllBytes(input, epub.Content.ToArray());
             Run(input, output);
             if (!File.Exists(output))
@@ -103,7 +103,7 @@ public sealed class CalibreConverter(string exePath, TimeSpan timeout, string? t
         start.ArgumentList.Add(output);
 
         // Calibre's own scratch files (unpacked book) go into our private folder, which is always deleted.
-        var scratch = Path.Combine(Path.GetDirectoryName(input)!, "calibre-temp");
+        var scratch = Path.Join(Path.GetDirectoryName(input)!, "calibre-temp");
         Directory.CreateDirectory(scratch);
         start.Environment["CALIBRE_TEMP_DIR"] = scratch;
 

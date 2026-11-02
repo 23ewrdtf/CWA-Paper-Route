@@ -29,14 +29,22 @@ internal sealed partial class KillOnCloseJob : IDisposable
             return null;
         }
 
-        var info = new ExtendedLimitInformation { Basic = new BasicLimitInformation { LimitFlags = KillOnJobClose } };
-        if (!SetInformationJobObject(handle, JobObjectExtendedLimitInformation, ref info, (uint)Marshal.SizeOf<ExtendedLimitInformation>()))
+        try
+        {
+            var info = new ExtendedLimitInformation { Basic = new BasicLimitInformation { LimitFlags = KillOnJobClose } };
+            if (SetInformationJobObject(handle, JobObjectExtendedLimitInformation, ref info, (uint)Marshal.SizeOf<ExtendedLimitInformation>()))
+            {
+                return new KillOnCloseJob(handle);
+            }
+        }
+        catch
         {
             handle.Dispose();
-            return null;
+            throw;
         }
 
-        return new KillOnCloseJob(handle);
+        handle.Dispose();
+        return null;
     }
 
     /// <summary>Puts a process into the job; helpers it starts afterwards join automatically.</summary>

@@ -5,11 +5,11 @@ namespace PaperRoute.Devices.Tests;
 
 public sealed class MassStorageTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "paperroute-drive-" + Guid.NewGuid().ToString("N"));
+    private readonly string _root = Path.Join(Path.GetTempPath(), "paperroute-drive-" + Guid.NewGuid().ToString("N"));
 
     public MassStorageTests() => Directory.CreateDirectory(_root);
 
-    private string Documents => Path.Combine(_root, "documents");
+    private string Documents => Path.Join(_root, "documents");
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
@@ -53,7 +53,7 @@ public sealed class MassStorageTests : IDisposable
 
         reader.Write("a.azw3", new byte[10]);
 
-        Assert.True(File.Exists(Path.Combine(Documents, "a.azw3")));
+        Assert.True(File.Exists(Path.Join(Documents, "a.azw3")));
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public sealed class MassStorageTests : IDisposable
     {
         Reader().Write("a.azw3", new byte[10]);
 
-        Assert.True(File.Exists(Path.Combine(Documents, "a.azw3")));
+        Assert.True(File.Exists(Path.Join(Documents, "a.azw3")));
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public sealed class MassStorageTests : IDisposable
         reader.Write("a.azw3", new byte[10]);
         reader.Write("a.azw3", new byte[20]);
 
-        Assert.Equal(20, new FileInfo(Path.Combine(Documents, "a.azw3")).Length);
+        Assert.Equal(20, new FileInfo(Path.Join(Documents, "a.azw3")).Length);
         Assert.Single(Directory.GetFiles(Documents));
     }
 
@@ -116,7 +116,7 @@ public sealed class MassStorageTests : IDisposable
 
         Reader().Write("a.mobi", content);
 
-        Assert.Equal(content, File.ReadAllBytes(Path.Combine(Documents, "a.mobi")));
+        Assert.Equal(content, File.ReadAllBytes(Path.Join(Documents, "a.mobi")));
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public sealed class MassStorageTests : IDisposable
     {
         var reader = Reader();
         reader.Write("a.azw3", new byte[10]);
-        var target = Path.Combine(Documents, "a.azw3");
+        var target = Path.Join(Documents, "a.azw3");
 
         using (new FileStream(target, FileMode.Open, FileAccess.Read, FileShare.None))
         {
@@ -196,7 +196,7 @@ public sealed class MassStorageTests : IDisposable
     {
         foreach (var dir in dirs ?? [])
         {
-            Directory.CreateDirectory(Path.Combine(_root, dir));
+            Directory.CreateDirectory(Path.Join(_root, dir));
         }
 
         return new DriveCandidate(_root, label, Removable: true, Ready: true, FreeBytes: freeBytes);

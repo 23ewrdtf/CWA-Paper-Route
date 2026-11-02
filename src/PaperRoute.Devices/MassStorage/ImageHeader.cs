@@ -12,6 +12,8 @@ internal static class ImageHeader
     /// <summary>Largest accepted cover file in bytes.</summary>
     public const int MaxBytes = 10 * 1024 * 1024;
 
+    private static ReadOnlySpan<byte> PngMagic => [0x89, (byte)'P', (byte)'N', (byte)'G'];
+
     /// <summary>Returns whether the image may be handed to the decoder: known format, readable size, within limits.</summary>
     /// <param name="image">Image file bytes.</param>
     /// <returns><see langword="false"/> for unknown formats, unreadable headers and oversized images.</returns>
@@ -26,7 +28,7 @@ internal static class ImageHeader
     /// <returns>The size, or <see langword="null"/> when it cannot be read.</returns>
     public static (int Width, int Height)? TryReadSize(ReadOnlySpan<byte> image)
     {
-        if (image.Length >= 24 && image.StartsWith((ReadOnlySpan<byte>)[0x89, (byte)'P', (byte)'N', (byte)'G']) && image.Slice(12, 4).SequenceEqual("IHDR"u8))
+        if (image.Length >= 24 && image.StartsWith(PngMagic) && image.Slice(12, 4).SequenceEqual("IHDR"u8))
         {
             return (BinaryPrimitives.ReadInt32BigEndian(image[16..]), BinaryPrimitives.ReadInt32BigEndian(image[20..]));
         }

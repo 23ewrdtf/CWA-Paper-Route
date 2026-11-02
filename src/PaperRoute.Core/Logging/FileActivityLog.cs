@@ -27,7 +27,7 @@ public sealed class FileActivityLog : IActivityLog
     {
         ArgumentNullException.ThrowIfNull(line);
         var date = _time.GetLocalNow().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        var path = Path.Combine(_directory, date + ".log");
+        var path = Path.Join(_directory, date + ".log");
         lock (_gate)
         {
             try

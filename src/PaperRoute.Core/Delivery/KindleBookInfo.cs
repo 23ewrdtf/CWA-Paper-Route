@@ -17,6 +17,10 @@ public sealed record KindleBookInfo(string? Asin, string? CdeType, ReadOnlyMemor
     private const uint HasExth = 0x40;
     private const uint NoImages = 0xFFFFFFFF;
 
+    private static ReadOnlySpan<byte> JpegMagic => [0xFF, 0xD8, 0xFF];
+
+    private static ReadOnlySpan<byte> PngMagic => [0x89, (byte)'P', (byte)'N', (byte)'G'];
+
     /// <summary>Reads the header of a MOBI/AZW3 book. Never throws on malformed input.</summary>
     /// <param name="book">The book file.</param>
     /// <returns>The details, or <see langword="null"/> when the file is not a MOBI-family book.</returns>
@@ -118,8 +122,8 @@ public sealed record KindleBookInfo(string? Asin, string? CdeType, ReadOnlyMemor
     }
 
     private static bool IsImage(ReadOnlySpan<byte> data) =>
-        data.StartsWith((ReadOnlySpan<byte>)[0xFF, 0xD8, 0xFF]) // JPEG
-        || data.StartsWith((ReadOnlySpan<byte>)[0x89, (byte)'P', (byte)'N', (byte)'G']) // PNG
+        data.StartsWith(JpegMagic)
+        || data.StartsWith(PngMagic)
         || data.StartsWith("GIF8"u8);
 
     private static string? Text(byte[] data)

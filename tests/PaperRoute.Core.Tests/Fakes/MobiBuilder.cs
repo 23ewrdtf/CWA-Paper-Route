@@ -45,7 +45,7 @@ internal static class MobiBuilder
         stream.Write(mobi);
         if (exth.Count > 0)
         {
-            var body = new MemoryStream();
+            using var body = new MemoryStream();
             var head = new byte[8];
             foreach (var (type, data) in exth)
             {

@@ -17,7 +17,7 @@ public static class CalibreLocator
             return configured;
         }
 
-        var standard = Path.Combine(programFiles ?? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Calibre2", ExeName);
+        var standard = Path.Join(programFiles ?? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Calibre2", ExeName);
         if (File.Exists(standard))
         {
             return standard;
@@ -25,7 +25,7 @@ public static class CalibreLocator
 
         var path = pathVariable ?? Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
         return path.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(folder => Path.Combine(folder, ExeName))
+            .Select(folder => Path.Join(folder, ExeName))
             .FirstOrDefault(File.Exists);
     }
 }

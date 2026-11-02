@@ -7,13 +7,13 @@ namespace PaperRoute.Core.Tests;
 
 public sealed class ProtectedPasswordTests : IDisposable
 {
-    private readonly string _dir = Path.Combine(Path.GetTempPath(), "paperroute-secret-" + Guid.NewGuid().ToString("N"));
+    private readonly string _dir = Path.Join(Path.GetTempPath(), "paperroute-secret-" + Guid.NewGuid().ToString("N"));
     private readonly string _path;
 
     public ProtectedPasswordTests()
     {
         Directory.CreateDirectory(_dir);
-        _path = Path.Combine(_dir, "config.json");
+        _path = Path.Join(_dir, "config.json");
     }
 
     public void Dispose() => Directory.Delete(_dir, recursive: true);

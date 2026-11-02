@@ -38,7 +38,7 @@ public sealed class SettingsFormTests
         where T : Control => Descendants(root).OfType<T>().First(match);
 
     private static IEnumerable<Control> Descendants(Control control) =>
-        control.Controls.Cast<Control>().SelectMany(c => (IEnumerable<Control>)[c, .. Descendants(c)]);
+        control.Controls.Cast<Control>().SelectMany(c => Descendants(c).Prepend(c));
 
     private static void RunOnStaThread(Action test)
     {

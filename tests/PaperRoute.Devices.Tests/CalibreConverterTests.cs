@@ -8,8 +8,8 @@ namespace PaperRoute.Devices.Tests;
 
 public sealed class CalibreConverterTests : IDisposable
 {
-    private static readonly string FakeExe = Path.Combine(AppContext.BaseDirectory, "PaperRoute.FakeConverter.exe");
-    private readonly string _temp = Path.Combine(Path.GetTempPath(), "paperroute-conv-" + Guid.NewGuid().ToString("N"));
+    private static readonly string FakeExe = Path.Join(AppContext.BaseDirectory, "PaperRoute.FakeConverter.exe");
+    private readonly string _temp = Path.Join(Path.GetTempPath(), "paperroute-conv-" + Guid.NewGuid().ToString("N"));
 
     public CalibreConverterTests() => Directory.CreateDirectory(_temp);
 
@@ -93,7 +93,7 @@ public sealed class CalibreConverterTests : IDisposable
     [Fact]
     public void Missing_executable_is_unavailable_and_errors()
     {
-        var converter = new CalibreConverter(Path.Combine(_temp, "nope.exe"), TimeSpan.FromSeconds(5), _temp);
+        var converter = new CalibreConverter(Path.Join(_temp, "nope.exe"), TimeSpan.FromSeconds(5), _temp);
 
         Assert.False(converter.IsAvailable);
         Assert.Throws<ConversionException>(() => converter.ToAzw3(Epub("a.epub", "ok")));

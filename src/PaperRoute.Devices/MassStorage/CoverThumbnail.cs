@@ -42,7 +42,7 @@ internal static partial class CoverThumbnail
         }
 
         // The ID is already restricted to [A-Za-z0-9-]; GetFileName also guarantees no folder part.
-        var target = Path.Combine(thumbnails.FullName, Path.GetFileName($"thumbnail_{asin}_{type}_portrait.jpg"));
+        var target = Path.Join(thumbnails.FullName, Path.GetFileName($"thumbnail_{asin}_{type}_portrait.jpg"));
         var temp = target + ".paperroute-tmp";
         try
         {
@@ -103,8 +103,9 @@ internal static partial class CoverThumbnail
         }
 
         var jpeg = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Jpeg.Guid);
+        using var quality = new EncoderParameter(Encoder.Quality, JpegQuality);
         using var parameters = new EncoderParameters(1);
-        parameters.Param[0] = new EncoderParameter(Encoder.Quality, JpegQuality);
+        parameters.Param[0] = quality;
         using var output = new MemoryStream();
         thumbnail.Save(output, jpeg, parameters);
         return output.ToArray();

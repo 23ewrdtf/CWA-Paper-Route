@@ -9,11 +9,11 @@ namespace PaperRoute.Devices.Tests;
 [Collection(GdiSerial.Name)]
 public sealed class CoverThumbnailTests : IDisposable
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "paperroute-thumb-" + Guid.NewGuid().ToString("N"));
+    private readonly string _root = Path.Join(Path.GetTempPath(), "paperroute-thumb-" + Guid.NewGuid().ToString("N"));
 
-    public CoverThumbnailTests() => Directory.CreateDirectory(Path.Combine(_root, "system", "thumbnails"));
+    public CoverThumbnailTests() => Directory.CreateDirectory(Path.Join(_root, "system", "thumbnails"));
 
-    private string Thumbnails => Path.Combine(_root, "system", "thumbnails");
+    private string Thumbnails => Path.Join(_root, "system", "thumbnails");
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
@@ -22,7 +22,7 @@ public sealed class CoverThumbnailTests : IDisposable
     {
         Reader().Write("Ubik.azw3", MobiBuilder.Build("e83f56a9-479b-45a9-8483-219008b1b053", "EBOK", Jpeg(315, 500)));
 
-        var thumbnail = Path.Combine(Thumbnails, "thumbnail_e83f56a9-479b-45a9-8483-219008b1b053_EBOK_portrait.jpg");
+        var thumbnail = Path.Join(Thumbnails, "thumbnail_e83f56a9-479b-45a9-8483-219008b1b053_EBOK_portrait.jpg");
         Assert.True(File.Exists(thumbnail));
         using var image = Image.FromFile(thumbnail);
         Assert.Equal(ImageFormat.Jpeg.Guid, image.RawFormat.Guid);
@@ -36,7 +36,7 @@ public sealed class CoverThumbnailTests : IDisposable
     {
         Reader().Write("a.azw3", MobiBuilder.Build("B000WIDE01", "EBOK", Jpeg(800, 400)));
 
-        using var image = Image.FromFile(Path.Combine(Thumbnails, "thumbnail_B000WIDE01_EBOK_portrait.jpg"));
+        using var image = Image.FromFile(Path.Join(Thumbnails, "thumbnail_B000WIDE01_EBOK_portrait.jpg"));
         Assert.Equal(CoverThumbnail.MaxWidth, image.Width);
         Assert.InRange(image.Height, 105, 109);
     }
@@ -44,12 +44,12 @@ public sealed class CoverThumbnailTests : IDisposable
     [Fact]
     public void No_thumbnails_folder_means_no_thumbnail_but_book_is_delivered()
     {
-        Directory.Delete(Path.Combine(_root, "system"), recursive: true);
+        Directory.Delete(Path.Join(_root, "system"), recursive: true);
 
         Reader().Write("a.azw3", MobiBuilder.Build("B000TEST01", "EBOK", Jpeg(100, 150)));
 
-        Assert.True(File.Exists(Path.Combine(_root, "documents", "a.azw3")));
-        Assert.False(Directory.Exists(Path.Combine(_root, "system")));
+        Assert.True(File.Exists(Path.Join(_root, "documents", "a.azw3")));
+        Assert.False(Directory.Exists(Path.Join(_root, "system")));
     }
 
     [Theory]
@@ -80,7 +80,7 @@ public sealed class CoverThumbnailTests : IDisposable
 
         Reader().Write("a.azw3", MobiBuilder.Build("B000TEST01", "EBOK", notReallyJpeg));
 
-        Assert.True(File.Exists(Path.Combine(_root, "documents", "a.azw3")));
+        Assert.True(File.Exists(Path.Join(_root, "documents", "a.azw3")));
         Assert.Empty(Directory.GetFiles(Thumbnails));
     }
 
@@ -95,20 +95,20 @@ public sealed class CoverThumbnailTests : IDisposable
     [Fact]
     public void Kindle_partial_file_is_left_alone_and_real_thumbnail_added()
     {
-        var partial = Path.Combine(Thumbnails, "thumbnail_B000TEST01_EBOK_portrait.jpg.partial");
+        var partial = Path.Join(Thumbnails, "thumbnail_B000TEST01_EBOK_portrait.jpg.partial");
         File.WriteAllBytes(partial, []);
 
         Reader().Write("a.azw3", MobiBuilder.Build("B000TEST01", "EBOK", Jpeg(100, 150)));
 
         Assert.True(File.Exists(partial));
-        Assert.True(File.Exists(Path.Combine(Thumbnails, "thumbnail_B000TEST01_EBOK_portrait.jpg")));
+        Assert.True(File.Exists(Path.Join(Thumbnails, "thumbnail_B000TEST01_EBOK_portrait.jpg")));
         Assert.Empty(Directory.GetFiles(Thumbnails, "*.paperroute-tmp"));
     }
 
     [Fact]
     public void Read_only_thumbnail_folder_still_delivers_the_book()
     {
-        var target = Path.Combine(Thumbnails, "thumbnail_B000TEST01_EBOK_portrait.jpg");
+        var target = Path.Join(Thumbnails, "thumbnail_B000TEST01_EBOK_portrait.jpg");
         File.WriteAllBytes(target, [1]);
         File.SetAttributes(target, FileAttributes.ReadOnly);
         try
@@ -116,7 +116,7 @@ public sealed class CoverThumbnailTests : IDisposable
             var error = Record.Exception(() => Reader().Write("a.azw3", MobiBuilder.Build("B000TEST01", "EBOK", Jpeg(100, 150))));
 
             Assert.Null(error);
-            Assert.True(File.Exists(Path.Combine(_root, "documents", "a.azw3")));
+            Assert.True(File.Exists(Path.Join(_root, "documents", "a.azw3")));
             Assert.Empty(Directory.GetFiles(Thumbnails, "*.paperroute-tmp"));
         }
         finally

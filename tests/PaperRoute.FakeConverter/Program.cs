@@ -45,7 +45,7 @@ if (mode.StartsWith("MODE:env", StringComparison.Ordinal))
         return 4;
     }
 
-    await File.WriteAllTextAsync(Path.Combine(scratch, "calibre-scratch.txt"), "book data");
+    await File.WriteAllTextAsync(Path.Join(scratch, "calibre-scratch.txt"), "book data");
 }
 
 if (mode.StartsWith("MODE:noout", StringComparison.Ordinal))

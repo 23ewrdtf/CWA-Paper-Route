@@ -58,8 +58,8 @@ public sealed class MassStorageReader : IReaderDevice
             throw new DeviceWriteException("the Kindle is no longer connected (its drive letter now belongs to something else)");
         }
 
-        var documents = Path.Combine(_root, "documents");
-        var target = Path.Combine(documents, fileName);
+        var documents = Path.Join(_root, "documents");
+        var target = Path.Join(documents, fileName);
         var temp = target + TempSuffix;
         try
         {
@@ -92,7 +92,7 @@ public sealed class MassStorageReader : IReaderDevice
     {
         try
         {
-            _ = CoverThumbnail.TryWrite(new DirectoryInfo(Path.Combine(_root, "system", "thumbnails")), book);
+            _ = CoverThumbnail.TryWrite(new DirectoryInfo(Path.Join(_root, "system", "thumbnails")), book);
         }
         catch (Exception e)
         {

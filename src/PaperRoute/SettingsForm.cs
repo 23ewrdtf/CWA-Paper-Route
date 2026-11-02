@@ -16,6 +16,11 @@ internal sealed class SettingsForm : Form
     private readonly TextBox _recipient = new() { Width = 260 };
     private readonly Label _error = new() { AutoSize = true, ForeColor = Color.Firebrick, MaximumSize = new Size(460, 0) };
     private readonly Button _save = new() { Text = "Save", AutoSize = true };
+    private readonly CheckBox _showPassword = new() { Text = "Show", AutoSize = true };
+    private readonly Button _copyPassword = new() { Text = "Copy", AutoSize = true };
+    private readonly Button _regenerate = new() { Text = "New password", AutoSize = true };
+    private readonly Button _copyAll = new() { Text = "Copy CWA settings", AutoSize = true };
+    private readonly Button _cancel = new() { Text = "Cancel", AutoSize = true };
 
     public SettingsForm(AppConfig config, Func<AppConfig, Task<StartResult>> apply)
     {
@@ -40,25 +45,20 @@ internal sealed class SettingsForm : Form
 
     private TableLayoutPanel BuildLayout()
     {
-        var showPassword = new CheckBox { Text = "Show", AutoSize = true };
-        showPassword.CheckedChanged += (_, _) => _password.UseSystemPasswordChar = !showPassword.Checked;
-        var copyPassword = new Button { Text = "Copy", AutoSize = true };
-        copyPassword.Click += (_, _) => CopyToClipboard(_password.Text);
-        var regenerate = new Button { Text = "New password", AutoSize = true };
-        regenerate.Click += (_, _) => RegeneratePassword();
-        var copyAll = new Button { Text = "Copy CWA settings", AutoSize = true };
-        copyAll.Click += (_, _) => CopyCwaSettings();
+        _showPassword.CheckedChanged += (_, _) => _password.UseSystemPasswordChar = !_showPassword.Checked;
+        _copyPassword.Click += (_, _) => CopyToClipboard(_password.Text);
+        _regenerate.Click += (_, _) => RegeneratePassword();
+        _copyAll.Click += (_, _) => CopyCwaSettings();
         // The window is shown modeless (Show, not ShowDialog), so DialogResult alone would not close it.
-        var cancel = new Button { Text = "Cancel", AutoSize = true };
-        cancel.Click += (_, _) => Close();
+        _cancel.Click += (_, _) => Close();
         _save.Click += (_, _) => _ = SaveAsync();
         AcceptButton = _save;
-        CancelButton = cancel;
+        CancelButton = _cancel;
 
         var grid = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Dock = DockStyle.Fill };
         AddRow(grid, "Port:", _port);
         AddRow(grid, "Login:", _login);
-        AddRow(grid, "Password:", Row(_password, showPassword, copyPassword, regenerate));
+        AddRow(grid, "Password:", Row(_password, _showPassword, _copyPassword, _regenerate));
         AddRow(grid, "eReader e-mail:", _recipient);
         var help = new Label
         {
@@ -73,7 +73,7 @@ internal sealed class SettingsForm : Form
         grid.Controls.Add(_error, 0, grid.RowCount);
         grid.SetColumnSpan(_error, 2);
         grid.RowCount++;
-        var buttons = Row(copyAll, _save, cancel);
+        var buttons = Row(_copyAll, _save, _cancel);
         grid.Controls.Add(buttons, 0, grid.RowCount);
         grid.SetColumnSpan(buttons, 2);
         return grid;

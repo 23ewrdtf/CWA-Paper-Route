@@ -4,8 +4,8 @@ namespace PaperRoute.Devices.Tests;
 
 public sealed class InstalledCalibreTests : IDisposable
 {
-    private static readonly string FakeExe = Path.Combine(AppContext.BaseDirectory, "PaperRoute.FakeConverter.exe");
-    private readonly string _dir = Path.Combine(Path.GetTempPath(), "paperroute-inst-" + Guid.NewGuid().ToString("N"));
+    private static readonly string FakeExe = Path.Join(AppContext.BaseDirectory, "PaperRoute.FakeConverter.exe");
+    private readonly string _dir = Path.Join(Path.GetTempPath(), "paperroute-inst-" + Guid.NewGuid().ToString("N"));
 
     public InstalledCalibreTests() => Directory.CreateDirectory(_dir);
 
