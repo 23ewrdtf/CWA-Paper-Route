@@ -23,10 +23,10 @@ internal static partial class CoverThumbnail
     private const long JpegQuality = 90L;
 
     /// <summary>Best effort: writes the thumbnail and returns whether it did; never throws for bad input or I/O.</summary>
-    /// <param name="kindleRoot">Root folder of the Kindle drive.</param>
+    /// <param name="thumbnails">The Kindle's <c>system\thumbnails</c> folder (from the drive Windows reported).</param>
     /// <param name="book">The book that was just copied.</param>
     /// <returns><see langword="true"/> when a thumbnail was written.</returns>
-    public static bool TryWrite(string kindleRoot, ReadOnlySpan<byte> book)
+    public static bool TryWrite(DirectoryInfo thumbnails, ReadOnlySpan<byte> book)
     {
         var info = KindleBookInfo.TryRead(book);
         if (info is not { Asin: { } asin, CdeType: { } type, Cover: { } cover } || !IsSafe(asin, type)
@@ -35,19 +35,18 @@ internal static partial class CoverThumbnail
             return false;
         }
 
-        var folder = Path.Combine(kindleRoot, "system", "thumbnails");
-        if (!Directory.Exists(folder))
+        ArgumentNullException.ThrowIfNull(thumbnails);
+        if (!thumbnails.Exists)
         {
             return false;
         }
 
         // The ID is already restricted to [A-Za-z0-9-]; GetFileName also guarantees no folder part.
-        var target = Path.Combine(folder, Path.GetFileName($"thumbnail_{asin}_{type}_portrait.jpg"));
+        var target = Path.Combine(thumbnails.FullName, Path.GetFileName($"thumbnail_{asin}_{type}_portrait.jpg"));
         var temp = target + ".paperroute-tmp";
         try
         {
-            // kindleRoot is a drive root reported by Windows (DriveInfo), never taken from the message.
-            File.WriteAllBytes(temp, Scale(cover.ToArray())); // nosemgrep: csharp.lang.security.filesystem.unsafe-path-combine.unsafe-path-combine
+            File.WriteAllBytes(temp, Scale(cover.ToArray()));
             File.Move(temp, target, overwrite: true);
             return true;
         }

@@ -84,15 +84,15 @@ public sealed class MassStorageReader : IReaderDevice
         }
 
         // The book is in place; the cover thumbnail is a best-effort extra.
-        TryWriteThumbnail(_root, content.Span);
+        TryWriteThumbnail(content.Span);
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "The book is already delivered; nothing about the optional cover may turn that into a failure.")]
-    private static void TryWriteThumbnail(string root, ReadOnlySpan<byte> book)
+    private void TryWriteThumbnail(ReadOnlySpan<byte> book)
     {
         try
         {
-            _ = CoverThumbnail.TryWrite(root, book);
+            _ = CoverThumbnail.TryWrite(new DirectoryInfo(Path.Combine(_root, "system", "thumbnails")), book);
         }
         catch (Exception e)
         {

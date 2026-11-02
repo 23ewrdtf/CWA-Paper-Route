@@ -1,2 +1,10 @@
 [files]
 extend-exclude = ["**/packages.lock.json"]
+
+[default.extend-words]
+# content.opf - the EPUB package file
+opf = "opf"
+# "PnP" (Plug and Play) device IDs
+Pn = "Pn"
+# SanDisk Cruzer - product name in a USB device ID test
+CRUZER = "CRUZER"

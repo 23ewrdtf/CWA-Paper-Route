@@ -149,6 +149,9 @@ jobs:
         env:
           # The app targets Windows; this lets the Linux runner restore it for the SBOM.
           EnableWindowsTargeting: "true"
+          # GitHub sets CI=true, which turns on locked-mode restore (Directory.Build.props). The Linux
+          # restore graph differs from the Windows lock files (NU1004), and this step only lists packages.
+          CI: "false"
         run: |
           dotnet tool restore
           dotnet CycloneDX src/PaperRoute/PaperRoute.csproj -t -F Json -o dist -fn paperroute.cdx.json \

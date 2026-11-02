@@ -30,8 +30,10 @@ jobs:
           persist-credentials: false
       - name: Semgrep
         run: |
-          python3 -m pip install --user "semgrep==1.183.0"
-          semgrep scan --error --metrics=off \
+          # semgrep/semgrep:1.183.0, pinned by digest
+          docker run --rm -v "$PWD:/src" -w /src \
+            semgrep/semgrep@sha256:2e45517a85e13a9cca14a2a00df6bb48affd66b8ebfae1b0991cd57578362fb0 \
+            semgrep scan --error --metrics=off \
             --config p/csharp --config p/secrets --config p/github-actions \
             --sarif --output semgrep.sarif
       - if: always()
@@ -127,7 +129,7 @@ jobs:
         with:
           persist-credentials: false
       - name: actionlint
-        run: docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:1.7.12 -color
+        run: docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color # v1.7.12
       - uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
 
   docs-lint:
