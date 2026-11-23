@@ -10,9 +10,9 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[3.0.320, )",
-        "resolved": "3.0.320",
-        "contentHash": "yKkD+uA684so6/ct3dcGm8H2esrLn/gAS9qYbAcis216gBx+o5LWm5ou/BZDIDg6TTzr5ayojv9cgpoHSasxOw=="
+        "requested": "[3.0.341, )",
+        "resolved": "3.0.341",
+        "contentHash": "zpogT6IwYBgNRa9+oETzs7aTU6Te3M/Osdkk/HN1TlJTDjz9dZwoUgh/yWqovT3jTofQGGLB1JqEK8I4uA6+yA=="
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
@@ -22,26 +22,26 @@
       },
       "SonarAnalyzer.CSharp": {
         "type": "Direct",
-        "requested": "[10.35.0.4138, )",
-        "resolved": "10.35.0.4138",
-        "contentHash": "T5o/tuyPw9pHRkyWxW07TkSri4I4pLpqwH922JuhphDjHAM7BUHaGE67h/w+65evHsIar8mYB2Ey6OmOLj9QDw=="
+        "requested": "[10.36.0.15337, )",
+        "resolved": "10.36.0.15337",
+        "contentHash": "jGLAZUjheSURfe0T/dJYGUrMOrLt1fxaInpChq75YJvrywsxFoUKK/EM6PSfTjkt4pbaq2ywIQjgQzhrmmj5Ow=="
       },
       "System.Drawing.Common": {
         "type": "Direct",
-        "requested": "[10.0.14, )",
-        "resolved": "10.0.14",
-        "contentHash": "kBe75KgVcm8soY0BPd5vTSLfC5vjd0O1YN6ApsL4qWnQiLUsOQ2k+PjWwraOI7JEp36mksavW/qz/r0NoSzYuQ==",
+        "requested": "[10.0.15, )",
+        "resolved": "10.0.15",
+        "contentHash": "ecd2daLWqjQSGoMnvfITWsJkZWyUbrHyVwwVElLjcAO+POirHOVoM/ITrvj8UrdPXlY6Gb8IV3ZQARbEi4brCg==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "10.0.14"
+          "Microsoft.Win32.SystemEvents": "10.0.15"
         }
       },
       "System.Management": {
         "type": "Direct",
-        "requested": "[10.0.14, )",
-        "resolved": "10.0.14",
-        "contentHash": "ywAltakc72Oe7liNatclpyq8oiLYx0VMSjQvphlsbPbiQ9glrV3JKvn5M2xFbsOzzh8sV3QAiUdmu2AV/ffN7Q==",
+        "requested": "[10.0.15, )",
+        "resolved": "10.0.15",
+        "contentHash": "U21LynVbH2ayLFLTqlLnd3hx52Fe/acpCXO4BAUIqfWs8CwFWT0zxlg8WR2+LZ7zcLgi/d08eq7rp4iLMMt+4w==",
         "dependencies": {
-          "System.CodeDom": "10.0.14"
+          "System.CodeDom": "10.0.15"
         }
       },
       "BouncyCastle.Cryptography": {
@@ -51,8 +51,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "axfieK5mj+uS/wLYl0dhlRFWdNP1iKHhx/M6DZNXPCSve7q4TCogw//W6BWGsYhnWuSw55aqheHE0a8l8s1oTw=="
+        "resolved": "10.0.15",
+        "contentHash": "kisX7LaeY4exvIgeyRfIp+xUmz2JoL+2n7pZv4W6na115P8659zw6vfB7IxD4sk6g9YZHwJ+vMzgS3Y5GMJqkA=="
       },
       "MimeKit": {
         "type": "Transitive",
@@ -70,8 +70,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "oJYTzyBcc2g06mU699LaJfm964mdlFg6l7BPeqdu8bmK6Fdy9fL9BWugGsZAqWtjnNWp4tanZZ9DlZwHJmmhgg=="
+        "resolved": "10.0.15",
+        "contentHash": "6oO8bbuYBjHWA9lZgDYRzVwtDwN5M1uW8MUcjiEHcHIEKM9B+xolkxVY9NCqzEn8yqGonMaat44cYKvv9TgYXw=="
       },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
