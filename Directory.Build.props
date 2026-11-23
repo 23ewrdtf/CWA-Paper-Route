@@ -23,8 +23,8 @@
     <RestoreLockedMode>true</RestoreLockedMode>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" PrivateAssets="all" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.36.0.15337" PrivateAssets="all" />
     <PackageReference Include="Roslynator.Analyzers" Version="5.0.1" PrivateAssets="all" />
-    <PackageReference Include="Meziantou.Analyzer" Version="3.0.320" PrivateAssets="all" />
+    <PackageReference Include="Meziantou.Analyzer" Version="3.0.341" PrivateAssets="all" />
   </ItemGroup>
 </Project>
